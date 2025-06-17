@@ -1,0 +1,14 @@
+*{
+    --main-bg-color: #222222;
+    --main-text-color: #e0e0e0;
+
+    --page-content-bg-color: #00000094;
+}
+
+.ant-layout {
+    min-height: 100vh;
+    background-color: var(--main-bg-color);
+    /* background: linear-gradient(15deg, #142850, #14365f, #13476f, #125d80, #107792, #0d96a5, #09b8b4, #04ccb1); */
+    background: conic-gradient(from 0deg at 20% -10%, #370000, #3f0326, #3b0846, #1d0d4b, #142850, #134168, #106483, #0b969f, #04bea5);
+    color: var(--main-text-color);
+}
