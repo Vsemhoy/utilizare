@@ -10,7 +10,7 @@ import './components/style/tablelist_ut.css';
 
 import debounce from 'lodash.debounce';
 
-  const sortOptions = [
+`  const sortOptions = [
     { value: 'name$asc', label: 'Name (A-Z)' },
     { value: 'name$desc', label: 'Name (Z-A)' },
     { value: 'sort_order$asc', label: 'Sort Order (↑)' },
@@ -26,7 +26,7 @@ import debounce from 'lodash.debounce';
     { value: 'starred$asc', label: 'Starred (Yes → No)' },
     { value: 'starred$desc', label: 'Starred (No → Yes)' },
     { value: 'color$asc', label: 'By color' },
-  ];
+  ];`
 
 // Оптимизированный Input компонент
 const OptimizedInput = React.memo(({ value, onChange, placeholder }) => {

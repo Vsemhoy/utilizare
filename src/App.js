@@ -52,6 +52,11 @@ function App() {
           setPageLoaded(true);
       }
   }
+
+
+
+  
+
   /** ------------------ FETCHES END ---------------- */
 
 
