@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { PROD_AXIOS_INSTANCE } from '../../../API/API';
 import { CSRF_TOKEN, PRODMODE } from '../../../config/config';
-import { useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 // import { TABLE_LIST_MOCK } from './components/mock/TABLELISTMOCK';
 import { Button, Input, Select } from 'antd';
 // import TableListCardUt from './components/TableListCardUt';
@@ -45,7 +45,7 @@ const OptimizedInput = React.memo(({ value, onChange, placeholder }) => {
 const CallStackPageUt = (props) => {
     const [baseCallList, setBaseCallList] = useState([]);
     const location = useLocation();
-
+    const navigate = useNavigate();
     const [setselectedSort, setSetselectedSort] = useState('name_asc');
     const [filterText, setFilterText] = useState('');
     const [filterName, setFilterName] = useState('');
@@ -107,6 +107,10 @@ const CallStackPageUt = (props) => {
 
         console.log('calls', calls);
         setAutoCalled(calls);
+    }
+
+    const handleDblClick = (id) => {
+       navigate(`/postal/callstack/${id}`);
     }
 
   return (
@@ -231,6 +235,7 @@ const CallStackPageUt = (props) => {
               key={tabitem.id}
               on_click_autocall={handleCallAutoCall}
               auto_call={autoCalled.find((item)=> item.id === tabitem.id) != null}
+              on_double_click={handleDblClick}
                 // onCheckCell={handleCheckCell}
                 // on_save_color={handleChangeColor}
                 // on_save_descr={handleChangeDescr}

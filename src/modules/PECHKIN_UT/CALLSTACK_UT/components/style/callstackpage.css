@@ -77,3 +77,7 @@
     background-color: rgb(0, 82, 130);
     color: rgb(187, 201, 220);
 }
+
+.jer-editor-container  {
+    max-width: 100% !important;
+}

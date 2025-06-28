@@ -39,9 +39,9 @@ const AppMenuUt = (props) => {
             </MenuItem>
 
             <MenuItem
-            key={'/pepa/callstack'}>
-                <NavLink to="/pepa/callstack">
-                  Pechkin
+            key={'/postal/callstack'}>
+                <NavLink to="/postal/callstack">
+                  POSTAL
                 </NavLink>
             </MenuItem>
 

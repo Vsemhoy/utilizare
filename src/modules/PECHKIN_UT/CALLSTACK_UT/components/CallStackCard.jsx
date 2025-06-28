@@ -52,13 +52,15 @@ const CallStackCard = (props) => {
 
     const handleDoubleClick = () => {
         if (props.on_double_click){
-            props.on_double_click();
+            props.on_double_click(itemId);
         }
     }
 
   return (
     <div className={`${autoCall ? "ut-autocall" : ""}`}>
-        <div className={'ut-call-stack-card'}>
+        <div className={'ut-call-stack-card'}
+            onDoubleClick={handleDoubleClick}
+        >
             <div>
               <div className={'ut-flex-center'}>
                 {itemId}
