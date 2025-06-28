@@ -3,6 +3,9 @@ import { Button, Input, Radio, Select } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { githubDarkTheme, JsonEditor } from 'json-edit-react';
 import React, { useEffect, useState } from 'react';
+import { CALL_DEFAULT_POST } from '../../../CALLSTACK_UT/components/MOCKSTACK';
+import { PROD_AXIOS_INSTANCE } from '../../../../../API/API';
+import { CSRF_TOKEN, HTTP_HOST } from '../../../../../config/config';
 
 
 const OptimizedInput = React.memo(({ value, onChange, placeholder }) => {
@@ -23,37 +26,57 @@ const OptimizedInput = React.memo(({ value, onChange, placeholder }) => {
 
 const CallPageUt = (props) => {
   const [activeTab, setActiveTab] = useState('body');
-  const [requestBody, setRequestBody] = useState({
-"string": "Welcome to the Editor 😀",
-  "number": 99,
-  "boolean": true,
-  "nothing": null,
-  "enum": "Option B 🍌",
-  "Usage": [
-    "Edit a value by clicking the \"edit\" icon, or double-clicking the value.",
-    "You can change the type of any value",
-    "You can add new values to objects or arrays",
-    "You can edit individual values, or even a whole object node at once (as JSON text)",
-    "You can also drag and drop!",
-    {
-      "nested": "An object inside an array",
-      "basic": false,
-      "value": 6.66
-    }
-  ],
-  "Keyboard interaction": {
-    "\"Enter\" to submit change": "(or Ctrl/Cmd-Enter when editing whole JSON nodes)",
-    "\"Escape\" to cancel": "👍",
-    "To start a new line": "Shift/Ctrl/Cmd-Enter (or just \"Enter\" when editing JSON nodes)",
-    "When copying to clipboard": "Hold down \"Ctrl/Cmd\" to copy path instead of data",
-    "When opening/closing a node": "Hold down \"Alt/Option\" to open/close ALL child nodes at once",
-    "Tab navigation": "Use \"Tab\" and \"Shift-Tab\" to quickly move between values."
-  }
-  });
+
+    const [itemId, setItemId] = useState(425);
+    const [method, setMethod] = useState(1);
+    const [name, setName] = useState('initialValue');
+    const [link, setLink] = useState('http://192.168.1.16/hello');
+    const [description, setDescription] = useState('');
+    const [tags, setTags] = useState('');
+    const [isCron, setIsCron] = useState(false);
+    const [starred, setStarred] = useState(false);
+    const [sortOrder, setSortOrder] = useState(1);
+
+    const [autoCall, setAutoCall] = useState(false);
+
+  const [requestBody, setRequestBody] = useState( JSON.parse(JSON.stringify(CALL_DEFAULT_POST)));
 
   const handleSetTab = (name) => {
     setActiveTab(name);
   }
+
+  const setReplacers = (obj) => {
+    if (obj._token && obj._token == "{{TOKEN}}"){
+      obj._token = CSRF_TOKEN
+    }
+    return obj;
+  }
+  const setReplacerHostAddress = (text) => {
+    return text.replace("{{HOST}}", HTTP_HOST);
+  }
+
+
+  const call_post = async (url, data) => {
+            try {
+                let response = await PROD_AXIOS_INSTANCE.post(url, data);
+                    if (response){
+                      console.log('response', response)
+                    }
+            } catch (e) {
+                console.log(e)
+            } finally {
+                // setLoadingOrgs(false)
+            }
+        }
+
+  const handlePostCall = () => {
+    let calldata = JSON.parse(JSON.stringify(CALL_DEFAULT_POST));
+    calldata = setReplacers(calldata);
+    let url = setReplacerHostAddress(link);
+
+    call_post(url, calldata);
+  }
+
 
   return (
     <div className={'ut-page-container'}>
@@ -67,6 +90,7 @@ const CallPageUt = (props) => {
             <div>
             
                 <Select
+                size={'large'}
                 style={{width: '120px'}}
                   placeholder="Select a person"
                   optionFilterProp="children"
@@ -93,6 +117,7 @@ const CallPageUt = (props) => {
             </div>
           <div style={{width: '100%'}} >
             <Input 
+            size={'large'}
              style={{width: '100%'}}
              value={"hello"}
              placeholder={'Name'}
@@ -100,16 +125,19 @@ const CallPageUt = (props) => {
           </div>
            <div style={{width: '100%'}} >
             <Input 
+            size={'large'}
              style={{width: '100%'}}
              value={"hello"}
-             placeholder={'Name'}
+             placeholder={'URL'}
              />
           </div>
           
 
             <div>
                 <Button
-         
+                  onClick={handlePostCall}
+                   size={'large'}
+                  danger
                  icon={<PlayCircleOutlined />}>Call</Button>
             </div>
         </div>

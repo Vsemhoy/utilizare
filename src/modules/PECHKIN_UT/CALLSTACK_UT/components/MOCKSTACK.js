@@ -12,3 +12,10 @@ export const CALL_DATA = {
     request_body: '',
     sort_order:  1
 }
+
+export const CALL_DEFAULT_POST = {
+    data: {
+        id: 0,
+    },
+    _token: "{{TOKEN}}"
+};
