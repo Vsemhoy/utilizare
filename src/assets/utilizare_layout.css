@@ -66,3 +66,8 @@
 .ut-pa-12 {
     padding: 12px;
 }
+ .ut-col-3-1 {
+    display: grid;
+    grid-template-columns: auto 260px;
+    grid-gap: 12px;
+ }
