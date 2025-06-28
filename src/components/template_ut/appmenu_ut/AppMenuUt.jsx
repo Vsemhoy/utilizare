@@ -38,6 +38,13 @@ const AppMenuUt = (props) => {
                 </NavLink>
             </MenuItem>
 
+            <MenuItem
+            key={'/pepa/callstack'}>
+                <NavLink to="/pepa/callstack">
+                  Pechkin
+                </NavLink>
+            </MenuItem>
+
             {/* <MenuItem
             key={'/db/tables/dfd'}>
                 <NavLink to="/db/tables/:table_name">

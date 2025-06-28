@@ -12,6 +12,7 @@ import MainPageUt from './modules/MAIN_PAGE_UT/MainPageUt';
 import { PROD_AXIOS_INSTANCE } from './API/API';
 import TableDataPageUt from './modules/DATABASE_UT/TABLE_DATA_UT/TableDataPageUt';
 import TableListPageUt from './modules/DATABASE_UT/TABLE_LIST_UT/TableListPageUt';
+import CallStackPageUt from './modules/PECHKIN_UT/CALLSTACK_UT/CallStackPageUt';
 
 
 
@@ -68,6 +69,9 @@ function App() {
          
             <Route path={'/db/tables/:tableName'} element={<TableDataPageUt userdata={userAct}/>} />
             <Route path={BASE_ROUTE + '/db/tables/:tableName'} element={<TableDataPageUt userdata={userAct}/>}  />
+
+            <Route path={'/pepa/callstack'} element={<CallStackPageUt userdata={userAct}/>} />
+            <Route path={BASE_ROUTE + '/pepa/callstack'} element={<CallStackPageUt userdata={userAct}/>}  />
             </Routes>
 
 

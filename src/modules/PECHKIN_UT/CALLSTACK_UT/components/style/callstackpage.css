@@ -1,0 +1,79 @@
+.ut-call-stack-card {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.233);
+    font-size: larger;
+    display: grid;
+    grid-template-columns: 40px 60px 250px 280px auto 50px 50px 50px 50px  44px;
+    background-color: rgba(27, 27, 27, 0.786);
+    transition: all 0.3s;
+}
+.ut-call-stack-card > div > div {
+    padding: 6px 4px;
+}
+.ut-table-list-stack {
+    padding-bottom: 40vh;
+}
+.ut-call-stack-card:hover {
+    background-color: rgba(2, 68, 111, 0.786);
+    color: white;
+}
+
+.ut-flex-center {
+    display: flex;
+    justify-content: center;
+}
+.ut-mini-button {
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(128, 128, 128, 0.299);
+    cursor: pointer;
+    min-width: 34px;
+    transition: all 0.3s;
+    background-color: rgba(240, 248, 255, 0.037);
+    display: flex;
+    justify-content: center;
+}
+
+
+.ut-mini-button:hover {
+    color: aqua;
+    border: 1px solid rgba(0, 255, 255, 0.329);
+}
+.ut-mini-button:active {
+    border: 1px solid aqua;
+    background-color: rgba(240, 248, 255, 0.079);
+
+}
+
+.ut-mini-button.active {
+    color: rgb(234, 18, 65);
+    border: 1px solid rgba(207, 14, 59, 0.575);
+}
+.ut-mini-button.active:hover {
+    border: 1px solid rgba(207, 14, 59, 0.9);
+}
+.ut-autocall {
+    outline: 1px solid rgba(207, 14, 59, 0.9);
+    background-color: rgba(255, 0, 51, 0.411);
+}
+
+.ut-mini-item {
+    padding: 6px;
+    min-width: 34px;
+    transition: all 0.3s;
+    display: flex;
+    justify-content: center;
+}
+
+.ut-method-item {
+    padding: 6px;
+    display: block;
+    text-align: center;
+}
+.ut-met-post {
+    background-color: indigo;
+    color: rgb(206, 187, 220);
+}
+.ut-met-get {
+    background-color: rgb(0, 82, 130);
+    color: rgb(187, 201, 220);
+}
