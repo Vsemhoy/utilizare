@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useId } from 'react';
 import { PROD_AXIOS_INSTANCE } from '../../../API/API';
 import { CSRF_TOKEN, PRODMODE } from '../../../config/config';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { Button, Input, Select } from 'antd';
 import { FileAddFilled, StarFilled } from '@ant-design/icons';
 import "./components/style/callstackpage.css";
 import CallStackCard from './components/CallStackCard';
-import { CALL_DATA } from './components/MOCKSTACK';
+import { CALL_DATA, CALL_DEFAULT_POST } from './components/MOCKSTACK';
 
   const sortOptions = [
     { value: 'name$asc', label: 'Name (A-Z)' },
@@ -27,6 +27,15 @@ import { CALL_DATA } from './components/MOCKSTACK';
     { value: 'starred$desc', label: 'Starred (No → Yes)' },
     { value: 'color$asc', label: 'By color' },
   ];
+
+const  generateRandomId = (length = 8) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
 
 
 // Оптимизированный Input компонент
@@ -64,6 +73,55 @@ const CallStackPageUt = (props) => {
       setSortedCallList(baseCallList);
     }, [baseCallList]);
 
+    useEffect(() => {
+
+        if (PRODMODE){
+            get_calls();
+        } else {
+            setBaseCallList([CALL_DATA]);
+        }
+    }, []);
+
+
+     /** ------------------ FETCHES ---------------- */
+    
+            const get_calls = async (req, res) => {
+              try {
+                  let response = await PROD_AXIOS_INSTANCE.get('/api/utilizare/postal/getrequests?_token=' + CSRF_TOKEN);
+                  console.log('LOADED: ', response.data);
+                  // setUserAct(response.data);
+                  setBaseCallList(response.data.content);
+              } catch (e) {
+                  console.log(e)
+              } finally {
+              }
+          }
+
+
+            const create_request = async (req, res) => {
+                const nexItem = JSON.parse(JSON.stringify(CALL_DATA));
+                nexItem.name = "New Call " + generateRandomId();
+                nexItem.link = "{{HOST}}/usda?_token={{TOKEN}}";
+                nexItem.request_body = JSON.stringify(CALL_DEFAULT_POST);
+                nexItem.sort_order = baseCallList.length + 1;
+                nexItem.method = 1;
+              try {
+                  let response = await PROD_AXIOS_INSTANCE.post('/api/utilizare/postal/createrequest', {
+                    data: nexItem,
+                    _token: CSRF_TOKEN
+                  });
+                  console.log('LOADED: ', response.data);
+                  // setUserAct(response.data);
+                //   setBaseCallList(response.data.content);
+                get_calls();
+              } catch (e) {
+                  console.log(e)
+              } finally {
+              }
+          }
+          /** ------------------ FETCHES END ---------------- */
+
+
     const handleSortChange = () => {
 
     }
@@ -78,9 +136,14 @@ const CallStackPageUt = (props) => {
     }
 
     const handleAddCall = () => {
-        const newCall = JSON.parse(JSON.stringify(CALL_DATA)) ;
-        newCall.id = baseCallList.length;
-        setBaseCallList((prevState)=>[newCall, ...prevState]);
+        if (PRODMODE){
+            create_request();
+        } else {
+            const newCall = JSON.parse(JSON.stringify(CALL_DATA)) ;
+            newCall.id = baseCallList.length;
+            setBaseCallList((prevState)=>[newCall, ...prevState]);
+
+        }
     }
 
     const handleCallAutoCall = (state, id, method, link, body) => {

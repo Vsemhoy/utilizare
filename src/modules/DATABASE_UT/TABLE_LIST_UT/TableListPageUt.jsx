@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { PROD_AXIOS_INSTANCE } from '../../../API/API';
 import { CSRF_TOKEN, PRODMODE } from '../../../config/config';
-import { TABLE_LIST_MOCK } from './components/mock/TABLELISTMOCK';
-import TableListCardUt from './components/TableListCardUt';
 import { useLocation } from 'react-router-dom';
-import './components/style/tablelist_ut.css';
-import { StarFilled } from '@ant-design/icons';
+import { TABLE_LIST_MOCK } from './components/mock/TABLELISTMOCK';
 import { Input, Select } from 'antd';
+import TableListCardUt from './components/TableListCardUt';
+import { StarFilled } from '@ant-design/icons';
+import './components/style/tablelist_ut.css';
 
 import debounce from 'lodash.debounce';
 
@@ -299,7 +299,7 @@ const TableListPageUt = (props) => {
 
   return (
     <div className={'ut-page-container'}>
-      <div className={'ut-mw-1100'}
+      <div className={'ut-mw-1200'}
       >
         <div className={'ut-content-page'}
         style={{ minHeight:'calc(100vh - 100px)'}}

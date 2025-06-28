@@ -6,7 +6,8 @@ import React, { useEffect, useState } from 'react';
 import { CALL_DATA, CALL_DEFAULT_POST, GROUPS_CALL_ITEMS } from '../../../CALLSTACK_UT/components/MOCKSTACK';
 import { PROD_AXIOS_INSTANCE } from '../../../../../API/API';
 import { CSRF_TOKEN, HTTP_HOST, PRODMODE } from '../../../../../config/config';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+
 
 
 const OptimizedInput = React.memo(({ value, onChange, placeholder }) => {
@@ -27,6 +28,9 @@ const OptimizedInput = React.memo(({ value, onChange, placeholder }) => {
 
 const CallPageUt = (props) => {
 
+const [response, setResponse] = useState(null);
+const [responseType, setResponseType] = useState(null); // 'json', 'html', 'text'
+
   const {call_id} = useParams();
   const [activeTab, setActiveTab] = useState('body');
 
@@ -40,7 +44,6 @@ const CallPageUt = (props) => {
     const [starred, setStarred] = useState(false);
     const [sortOrder, setSortOrder] = useState(1);
 
-    const [autoCall, setAutoCall] = useState(false);
     const [cronInterval, setCronInterval] = useState(0);
     const [cronMinutes, setCronMinutes] = useState("");
     const [autoRun, setAutoRun] = useState(false);
@@ -48,15 +51,51 @@ const CallPageUt = (props) => {
     const [groupId, setGroupId] = useState(0);
 
     const [baseData, setBaseData] = useState(null);
+
+    const [loaded, setLoaded] = useState(false);
     
   useEffect(() => {
     if (PRODMODE){
-
+      get_call();
     } else {
       setBaseData(CALL_DATA);
     }
   }, [itemId]);
 
+
+  const saveData = () => {
+    if (loaded){
+      let obj = {
+        id: itemId,
+        name: name,
+        link: link,
+        method: method,
+        description: description,
+        tags: tags,
+        is_cron: isCron,
+        starred: starred,
+        request_body: JSON.stringify(requestBody),
+        sort_order:  sortOrder,
+        cron_interval: cronInterval,
+        cron_minutes: cronMinutes,
+        auto_run: autoRun,
+        group_id: groupId,
+      };
+  
+      update_call(obj);
+    }
+  }
+
+
+useEffect(() => {
+  if (response && activeTab === 'response') {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
+}, [response, activeTab]);
+
+  useEffect(() => {
+    saveData();
+  }, [method, autoRun, isCron, groupId, starred]);
 
   useEffect(() => {
     console.log('baseData', baseData)
@@ -67,9 +106,24 @@ const CallPageUt = (props) => {
       setDescription(baseData.description);
       setTags(baseData.tags);
       setRequestBody(baseData.request_body);
+      setAutoRun(baseData.auto_run);
+      setCronInterval(baseData.cron_interval);
+      setCronMinutes(baseData.cron_minutes);
+      setSortOrder(baseData.sort_order);
+      setStarred(baseData.starred);
+      setGroupId(baseData.group_id);
+
+      setTimeout(() => {
+        setLoaded(true);
+      }, 5000);
     }
   }, [baseData]);
 
+//   useEffect(() => {
+//   if (response && activeTab === 'response') {
+//     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+//   }
+// }, [response, activeTab]);
 
   const [requestBody, setRequestBody] = useState( JSON.parse(JSON.stringify(CALL_DEFAULT_POST)));
 
@@ -78,35 +132,205 @@ const CallPageUt = (props) => {
   }
 
   const setReplacers = (obj) => {
-    if (obj._token && obj._token == "{{TOKEN}}"){
+    if (obj && obj._token && obj._token == "{{TOKEN}}"){
       obj._token = CSRF_TOKEN
     }
     return obj;
   }
   const setReplacerHostAddress = (text) => {
-    return text.replace("{{HOST}}", HTTP_HOST);
+    return text.replace("{{HOST}}", HTTP_HOST).replace("{{TOKEN}}", CSRF_TOKEN);
+
+  }
+
+
+const handleServerResponseNorm = (response) => {
+  const contentType = response.headers['content-type'] || '';
+
+  let type = 'text';
+  let data = response.data;
+
+  if (contentType.includes('application/json')) {
+    type = 'json';
+    try {
+      data = JSON.parse(JSON.stringify(data)); // нормализуем
+    } catch (e) {
+      data = data;
+    }
+  } else if (contentType.includes('text/html')) {
+    type = 'html';
+  }
+
+  setResponse(data);
+  setResponseType(type);
+};
+
+const handleServerResponse = (responseData, headers) => {
+  const contentType = headers['content-type'] || '';
+
+  if (contentType.includes('application/json')) {
+    setResponseType('json');
+    try {
+      setResponse(JSON.parse(responseData));
+    } catch (e) {
+      setResponse(responseData); // fallback
+    }
+  } else if (contentType.includes('text/html') || responseData.trim().startsWith('<!doctype html>')) {
+    setResponseType('html');
+    setResponse(responseData);
+  } else {
+    setResponseType('text');
+    setResponse(responseData);
+  }
+
+  setActiveTab('response'); // автоматически переключаем на вкладку Response
+};
+
+
+  /** ------------------ FETCHES ---------------- */
+
+  const get_call = async (req, res) => {
+    try {
+        let response = await PROD_AXIOS_INSTANCE.post('/api/utilizare/postal/getitem',
+          {
+            data: {
+              id: itemId
+            },
+            _token: CSRF_TOKEN
+          }
+        );
+        console.log('LOADED: ', response.data);
+        // setUserAct(response.data);
+        let obj = response.data.content;
+        obj.request_body = JSON.parse(obj.request_body);
+        setBaseData(response.data.content);
+    } catch (e) {
+        console.log(e)
+    } finally {
+    }
+}
+
+  const update_call = async (data, req, res) => {
+    try {
+        let response = await PROD_AXIOS_INSTANCE.post('/api/utilizare/postal/updaterequest',
+          {
+            data: data,
+            _token: CSRF_TOKEN
+          }
+        );
+        console.log('LOADED: ', response.data);
+        // setUserAct(response.data);
+
+    } catch (e) {
+        console.log(e)
+    } finally {
+    }
+  }
+
+    const delete_call = async (req, res) => {
+    try {
+        let response = await PROD_AXIOS_INSTANCE.post('/api/utilizare/postal/deleterequest',
+          {
+            data: {
+              id: itemId
+            },
+            _token: CSRF_TOKEN
+          }
+        );
+        console.log('LOADED: ', response.data);
+        // setUserAct(response.data);
+        let obj = response.data.content;
+        obj.request_body = JSON.parse(obj.request_body);
+        setBaseData(response.data.content);
+    } catch (e) {
+        console.log(e)
+    } finally {
+    }
   }
 
 
   const call_post = async (url, data) => {
-            try {
-                let response = await PROD_AXIOS_INSTANCE.post(url, data);
-                    if (response){
-                      console.log('response', response)
-                    }
-            } catch (e) {
-                console.log(e)
-            } finally {
-                // setLoadingOrgs(false)
+    try {
+        let response = await PROD_AXIOS_INSTANCE.post(url, data);
+        handleServerResponseNorm(response);
+        setActiveTab('response');
+            if (response){
+              console.log('response', response)
             }
-        }
+    } catch (e) {
+        console.log('Ошибка:', e);
+      if (e.response && e.response.data) {
+        handleServerResponse(e.response.data, e.response.headers);
+      } else {
+        setResponse('Ошибка соединения или сервер не отвечает');
+        setResponseType('text');
+        setActiveTab('response');
+      }
+    } finally {
+        // setLoadingOrgs(false)
+    }
+  }
 
-  const handlePostCall = () => {
-    let calldata = JSON.parse(JSON.stringify(CALL_DEFAULT_POST));
-    calldata = setReplacers(calldata);
+  const call_get = async (url) => {
+    try {
+        let response = await PROD_AXIOS_INSTANCE.get(url);
+        handleServerResponseNorm(response);
+        setActiveTab('response');
+            if (response){
+              console.log('response', response)
+            }
+    } catch (e) {
+        console.log('Ошибка:', e);
+      if (e.response && e.response.data) {
+        handleServerResponseNorm(e.response.data, e.response.headers);
+      } else {
+        setResponse('Ошибка соединения или сервер не отвечает');
+        setResponseType('text');
+        setActiveTab('response');
+      }
+    } finally {
+        // setLoadingOrgs(false)
+    }
+  }
+
+  const call_put = async (url, data) => {
+    try {
+        let response = await PROD_AXIOS_INSTANCE.put(url, data);
+        handleServerResponseNorm(response);
+        setActiveTab('response');
+            if (response){
+              console.log('response', response)
+            }
+    } catch (e) {
+        console.log('Ошибка:', e);
+    if (e.response && e.response.data) {
+      handleServerResponse(e.response.data, e.response.headers);
+    } else {
+      setResponse('Ошибка соединения или сервер не отвечает');
+      setResponseType('text');
+      setActiveTab('response');
+    }
+    } finally {
+        // setLoadingOrgs(false)
+    }
+  }
+
+
+  /** ------------------ FETCHES END ---------------- */
+
+  const handleCall = () => {
+    
+    let calldata = JSON.parse(JSON.stringify(requestBody));
+    calldata = setReplacers(calldata)
     let url = setReplacerHostAddress(link);
+    if (method == 1){
 
-    call_post(url, calldata);
+      call_get(url);
+    } else if (method == 2){
+      call_post(url, calldata);
+    } else {
+      call_put(url, calldata);
+
+    }
   }
 
 
@@ -119,6 +343,10 @@ const CallPageUt = (props) => {
         
         >
         <div style={{padding: '12px', gridGap: '12px'}} className={'ut-flex-space'}>
+
+                <div>
+            <Link to={`/postal/callstack#${itemId}`} >Back</Link>
+        </div>
             <div>
             
                 <Select
@@ -153,6 +381,7 @@ const CallPageUt = (props) => {
             </div>
           <div style={{width: '100%'}} >
             <Input 
+              onBlur={saveData}
             size={'large'}
              style={{width: '100%'}}
              value={name}
@@ -163,6 +392,7 @@ const CallPageUt = (props) => {
           </div>
            <div style={{width: '100%'}} >
             <Input 
+            onBlur={saveData}
             size={'large'}
              style={{width: '100%'}}
              value={link}
@@ -174,7 +404,7 @@ const CallPageUt = (props) => {
 
             <div>
                 <Button
-                  onClick={handlePostCall}
+                  onClick={handleCall}
                    size={'large'}
                   danger
                  icon={<PlayCircleOutlined />}>Call</Button>
@@ -184,6 +414,7 @@ const CallPageUt = (props) => {
         <div style={{padding: '12px', gridGap: '12px'}} className={'ut-flex-space'}>
            <div style={{width: '100%'}} >
             <TextArea 
+            onBlur={saveData}
              style={{width: '100%'}}
              value={description}
              placeholder={'Description'}
@@ -195,6 +426,7 @@ const CallPageUt = (props) => {
         <div style={{padding: '12px', gridGap: '12px'}} className={'ut-flex-space'}>
            <div style={{width: '100%'}} >
               <Radio.Group defaultValue="body" size="large"
+                value={activeTab}
                 onChange={(ev)=>{setActiveTab(ev.target.value)}}
               >
                 <Radio.Button value="body">Body</Radio.Button>
@@ -212,6 +444,7 @@ const CallPageUt = (props) => {
               data={requestBody}                // <-- правильно: data, не date
               setData={setRequestBody}          // <-- функция обновления данных
               theme={githubDarkTheme}            // если используешь тему
+              onBlur={saveData}
             />
             </div>
             <div className={'ut-side-panel'}>
@@ -233,6 +466,7 @@ const CallPageUt = (props) => {
               <br /> 
               <br /> 
               <Input
+              onBlur={saveData}
                 value={cronInterval}
                 onChange={(ev)=>{setCronInterval(ev.target.value)}}
                 placeholder='интервал в минутах'
@@ -243,6 +477,7 @@ const CallPageUt = (props) => {
               <br /> 
               <br /> 
                 <Input
+                onBlur={saveData}
                   value={cronMinutes}
                   onChange={(ev)=>{setCronMinutes(ev.target.value)}}
                   placeholder='запускать в указанные минуты часа'
@@ -257,6 +492,7 @@ const CallPageUt = (props) => {
               <br /> 
               <br /> 
                 <Input
+                onBlur={saveData}
                                 value={tags}
                 onChange={(ev)=>{setTags(ev.target.value)}}
                   placeholder='просто текст'
@@ -267,6 +503,7 @@ const CallPageUt = (props) => {
               <br /> 
               <br /> 
                 <Input
+                onBlur={saveData}
                                 value={sortOrder}
                 onChange={(ev)=>{setSortOrder(ev.target.value)}}
                   type={'number'} min={'1'} max={'32000000'}
@@ -287,13 +524,62 @@ const CallPageUt = (props) => {
                     value: item.id
                   }))}
                 />
-                  
+              <br /> 
+              <br /> 
+                   <Checkbox 
+                  checked={starred}
+                onChange={(ev)=>{setStarred(ev.target.checked)}}
+              >  Звёздочка</Checkbox>
+              <br />
+              <br />
             </div>
             
           </div>
         ) : (
           <div className={'ut-table-list-stack ut-pa-12'} style={{ width: '100%' }}>
-            Сюда мы поместим респонс ответ от сервера
+            {response ? (
+              <>
+                {responseType === 'json' && (
+                  <JsonEditor
+                    style={{ width: '100%', minHeight: '300px' }}
+                    data={response}
+                    theme={githubDarkTheme}
+                    readOnly
+                  />
+                )}
+
+                {responseType === 'html' && (
+                  <div
+                    style={{
+                      padding: '12px',
+                      background: '#1e1e1e',
+                      color: '#dcdcdc',
+                      fontFamily: 'monospace',
+                      maxHeight: '600px',
+                      overflowY: 'auto',
+                    }}
+                    dangerouslySetInnerHTML={{ __html: response }}
+                  />
+                )}
+
+                {responseType === 'text' && (
+                  <pre
+                    style={{
+                      whiteSpace: 'pre-wrap',
+                      wordWrap: 'break-word',
+                      padding: '12px',
+                      background: '#1e1e1e',
+                      color: '#dcdcdc',
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {JSON.stringify(response, null, 2)}
+                  </pre>
+                )}
+              </>
+            ) : (
+              <div>Ответ ещё не получен</div>
+            )}
           </div>
         )}
 

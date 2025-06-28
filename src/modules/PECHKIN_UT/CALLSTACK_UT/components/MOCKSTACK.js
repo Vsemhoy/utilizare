@@ -6,7 +6,7 @@ export const CALL_DATA = {
     name: 'Hello',
     link: 'http://hello.world',
     method: 2,
-    description: 'Hello world descre',
+    description: 'Hello wolf!',
     tags: "",
     is_cron: true,
     starred: false,
