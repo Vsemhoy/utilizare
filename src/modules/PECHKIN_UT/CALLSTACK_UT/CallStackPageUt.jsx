@@ -119,6 +119,29 @@ const CallStackPageUt = (props) => {
               } finally {
               }
           }
+
+            // const call_post = async (url, data) => {
+            //     try {
+            //         let response = await PROD_AXIOS_INSTANCE.post(url, data);
+            //         handleServerResponseNorm(response);
+            //         setActiveTab('response');
+            //         if (response){
+            //             console.log('response', response)
+            //         }
+            //     } catch (e) {
+            //         console.log('Ошибка:', e);
+            //         if (e.response && e.response.data) {
+            //             handleServerResponse(e.response.data, e.response.headers);
+            //         } else {
+            //             setResponse('Ошибка соединения или сервер не отвечает');
+            //             setResponseType('text');
+            //             setActiveTab('response');
+            //         }
+            //     } finally {
+            //         // setLoadingOrgs(false)
+            //     }
+            // }
+
           /** ------------------ FETCHES END ---------------- */
 
 
@@ -144,6 +167,10 @@ const CallStackPageUt = (props) => {
             setBaseCallList((prevState)=>[newCall, ...prevState]);
 
         }
+    }
+
+    const handelStartCall = () => {
+        console.log("HERE");
     }
 
     const handleCallAutoCall = (state, id, method, link, body) => {
@@ -299,6 +326,7 @@ const CallStackPageUt = (props) => {
               on_click_autocall={handleCallAutoCall}
               auto_call={autoCalled.find((item)=> item.id === tabitem.id) != null}
               on_double_click={handleDblClick}
+              onClick={handelStartCall}
                 // onCheckCell={handleCheckCell}
                 // on_save_color={handleChangeColor}
                 // on_save_descr={handleChangeDescr}
