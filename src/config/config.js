@@ -8,5 +8,4 @@ export const HOST_COMPONENT_ROOT = !PRODMODE ? '' : '/com/utilizare';
 export const BASE_NAME = PRODMODE ? '/utilizare' : '/';
 export const BASE_ROUTE = PRODMODE ? '/utilizare' : '';
 
-
 // console.log('HTTP ROOT', HTTP_ROOT);

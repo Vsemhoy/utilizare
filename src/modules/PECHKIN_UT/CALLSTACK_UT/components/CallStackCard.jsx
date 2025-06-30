@@ -50,10 +50,6 @@ const CallStackCard = (props) => {
         setStarred(!starred);
     }
 
-    const handelStartCall = () => {
-        console.log("HERE!");
-    }
-
 
     const handleDoubleClick = () => {
         if (props.on_double_click){
@@ -114,7 +110,7 @@ const CallStackCard = (props) => {
             </div>
             <div>
               <div className={'ut-flex-center'}>
-                <span className={'ut-mini-button'} onClick={handelStartCall}><PlayCircleOutlined /></span>
+                <span className={'ut-mini-button'} onClick={e => props.handelStartCall(itemId)}><PlayCircleOutlined /></span>
               </div>
             </div>
             <div>

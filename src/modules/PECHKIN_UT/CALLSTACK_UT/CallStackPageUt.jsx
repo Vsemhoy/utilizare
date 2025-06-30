@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo, useId } from 'react';
 import { PROD_AXIOS_INSTANCE } from '../../../API/API';
-import { CSRF_TOKEN, PRODMODE } from '../../../config/config';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import {CSRF_TOKEN, HTTP_HOST, PRODMODE} from '../../../config/config';
+import {data, Navigate, useLocation, useNavigate} from 'react-router-dom';
 // import { TABLE_LIST_MOCK } from './components/mock/TABLELISTMOCK';
 import { Button, Input, Select } from 'antd';
 // import TableListCardUt from './components/TableListCardUt';
@@ -58,6 +58,7 @@ const CallStackPageUt = (props) => {
     const [setselectedSort, setSetselectedSort] = useState('name_asc');
     const [filterText, setFilterText] = useState('');
     const [filterName, setFilterName] = useState('');
+    const [baseData, setBaseData] = useState(null);
 
     const [sortConfig, setSortConfig] = useState({
         key: 'name',
@@ -169,8 +170,128 @@ const CallStackPageUt = (props) => {
         }
     }
 
-    const handelStartCall = () => {
-        console.log("HERE");
+    const setReplacers = (obj) => {
+        if (obj && obj._token && obj._token == "{{TOKEN}}"){
+            obj._token = CSRF_TOKEN
+        }
+        return obj;
+    }
+    const setReplacerHostAddress = (text) => {
+        return text.replace("{{HOST}}", HTTP_HOST).replace("{{TOKEN}}", CSRF_TOKEN);
+
+    }
+
+    const call_post = async (url, data) => {
+        try {
+            let response = await PROD_AXIOS_INSTANCE.post(url, data);
+            // handleServerResponseNorm(response);
+            // setActiveTab('response');
+            if (response){
+                console.log('response', response)
+            }
+        } catch (e) {
+            console.log('Ошибка:', e);
+            if (e.response && e.response.data) {
+                // handleServerResponse(e.response.data, e.response.headers);
+            } else {
+                // setResponse('Ошибка соединения или сервер не отвечает');
+                // setResponseType('text');
+                // setActiveTab('response');
+            }
+        } finally {
+            // setLoadingOrgs(false)
+        }
+    }
+
+    const call_get = async (url) => {
+        try {
+            let response = await PROD_AXIOS_INSTANCE.get(url);
+            // handleServerResponseNorm(response);
+            // setActiveTab('response');
+            if (response){
+                console.log('response', response)
+            }
+        } catch (e) {
+            console.log('Ошибка:', e);
+            if (e.response && e.response.data) {
+                // handleServerResponseNorm(e.response.data, e.response.headers);
+            } else {
+                // setResponse('Ошибка соединения или сервер не отвечает');
+                // setResponseType('text');
+                // setActiveTab('response');
+            }
+        } finally {
+            // setLoadingOrgs(false)
+        }
+    }
+
+    const call_put = async (url, data) => {
+        try {
+            let response = await PROD_AXIOS_INSTANCE.put(url, data);
+            // handleServerResponseNorm(response);
+            // setActiveTab('response');
+            if (response){
+                console.log('response', response)
+            }
+        } catch (e) {
+            console.log('Ошибка:', e);
+            if (e.response && e.response.data) {
+                // handleServerResponse(e.response.data, e.response.headers);
+            } else {
+                // setResponse('Ошибка соединения или сервер не отвечает');
+                // setResponseType('text');
+                // setActiveTab('response');
+            }
+        } finally {
+            // setLoadingOrgs(false)
+        }
+    }
+
+    const get_call = async (itemId) => {
+        try {
+            let response = await PROD_AXIOS_INSTANCE.post('/api/utilizare/postal/getitem',
+                {
+                    data: {
+                        id: itemId
+                    },
+                    _token: CSRF_TOKEN
+                }
+            );
+
+            console.log('LOADED: ', response.data);
+            // setUserAct(response.data);
+            // let obj = response.data.content;
+            // obj.request_body = JSON.parse(obj.request_body);
+            setBaseData(response.data.content);
+
+            let calldata = JSON.parse(JSON.stringify(baseData.request_body));
+            calldata = setReplacers(calldata)
+            let url = setReplacerHostAddress(baseData.link);
+
+            switch (baseData.method){
+                case 1:
+                    call_get(url);
+                    break;
+                case 2:
+                    call_post(url, calldata);
+                    break;
+                case 3:
+                    call_put(url, calldata);
+                    break;
+            }
+
+
+            console.log(baseData);
+        } catch (e) {
+            console.log(e)
+        } finally {
+        }
+    }
+
+
+    const handelStartCall = (id) => {
+        console.log(id);
+        get_call(id)
     }
 
     const handleCallAutoCall = (state, id, method, link, body) => {
@@ -326,7 +447,7 @@ const CallStackPageUt = (props) => {
               on_click_autocall={handleCallAutoCall}
               auto_call={autoCalled.find((item)=> item.id === tabitem.id) != null}
               on_double_click={handleDblClick}
-              onClick={handelStartCall}
+              handelStartCall={handelStartCall}
                 // onCheckCell={handleCheckCell}
                 // on_save_color={handleChangeColor}
                 // on_save_descr={handleChangeDescr}
