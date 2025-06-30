@@ -81,7 +81,7 @@ const [responseType, setResponseType] = useState(null); // 'json', 'html', 'text
         auto_run: autoRun,
         group_id: groupId,
       };
-  
+
       update_call(obj);
     }
   }
@@ -333,6 +333,9 @@ const handleServerResponse = (responseData, headers) => {
     }
   }
 
+    useEffect(() => {
+        saveData()
+    }, [requestBody]);
 
   return (
     <div className={'ut-page-container'}>
@@ -549,24 +552,24 @@ const handleServerResponse = (responseData, headers) => {
                 )}
 
                 {responseType === 'html' && (
-                  <div
-                    style={{
-                      padding: '12px',
-                      background: '#1e1e1e',
-                      color: '#dcdcdc',
-                      fontFamily: 'monospace',
-                      maxHeight: '600px',
-                      overflowY: 'auto',
-                    }}
-                    dangerouslySetInnerHTML={{ __html: response }}
-                  />
+                    <iframe
+                        title="laravel-response"
+                        srcDoc={response}
+                        style={{
+                            width: '100%',
+                            height: '1000px',
+                            border: 'none',
+                            background: '#1e1e1e',
+                        }}
+                    />
+
                 )}
 
-                {responseType === 'text' && (
-                  <pre
-                    style={{
-                      whiteSpace: 'pre-wrap',
-                      wordWrap: 'break-word',
+                  {responseType === 'text' && (
+                      <pre
+                          style={{
+                              whiteSpace: 'pre-wrap',
+                              wordWrap: 'break-word',
                       padding: '12px',
                       background: '#1e1e1e',
                       color: '#dcdcdc',

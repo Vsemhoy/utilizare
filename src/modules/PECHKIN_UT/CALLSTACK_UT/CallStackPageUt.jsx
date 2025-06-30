@@ -264,24 +264,25 @@ const CallStackPageUt = (props) => {
             // obj.request_body = JSON.parse(obj.request_body);
             setBaseData(response.data.content);
 
-            let calldata = JSON.parse(JSON.stringify(baseData.request_body));
+            let calldata = JSON.parse(JSON.stringify(response.data.content.request_body));
             calldata = setReplacers(calldata)
-            let url = setReplacerHostAddress(baseData.link);
+            let url = setReplacerHostAddress(response.data.content.link);
 
-            switch (baseData.method){
+            console.log(response.data.content.method);
+            switch (response.data.content.method){
                 case 1:
-                    call_get(url);
+                    await call_get(url);
                     break;
                 case 2:
-                    call_post(url, calldata);
+                    await call_post(url, calldata);
                     break;
                 case 3:
-                    call_put(url, calldata);
+                    await call_put(url, calldata);
                     break;
             }
 
 
-            console.log(baseData);
+            console.log(response.data.content);
         } catch (e) {
             console.log(e)
         } finally {
